@@ -3,7 +3,7 @@
 
 from distutils.core import setup
 
-setup(name='tsne_torch',
+setup(name='torch_tsne',
       version='1.0',
       description='PyTorch implementation of t-SNE',
       author='Ankith Mohan',

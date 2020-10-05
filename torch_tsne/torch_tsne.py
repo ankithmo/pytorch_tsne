@@ -11,14 +11,20 @@
 #
 #  Created by Xiao Li on 23-03-2020.
 #  Copyright (c) 2020. All rights reserved.
+import os
+import os.path as osp
+import sys
+
 import numpy as np
 import matplotlib.pyplot as pyplot
 import argparse
 import torch
 
+mnist = osp.join(osp.abspath(osp.dirname(__file__)), "..", "mnist")
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--xfile", type=str, default="mnist2500_X.txt", help="file name of feature stored")
-parser.add_argument("--yfile", type=str, default="mnist2500_labels.txt", help="file name of label stored")
+parser.add_argument("--xfile", type=str, default=osp.join(mnist, "mnist2500_X.txt"), help="file name of feature stored")
+parser.add_argument("--yfile", type=str, default=osp.join(mnist, "mnist2500_labels.txt"), help="file name of label stored")
 parser.add_argument("--cuda", type=int, default=1, help="if use cuda accelarate")
 
 opt = parser.parse_args()
@@ -218,7 +224,7 @@ if __name__ == "__main__":
     #     Y1.write(str(Y[i,0])+"\n")
     #     Y2.write(str(Y[i,1])+"\n")
 
-    torch.save(Y, "tsne_coords.pt")
+    torch.save(Y, osp.join("results", "tsne_coords.pt"))
 
     pyplot.scatter(Y[:, 0], Y[:, 1], 20, labels)
     pyplot.show()
