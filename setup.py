@@ -8,5 +8,5 @@ setup(name='tsne_torch',
       description='PyTorch implementation of t-SNE',
       author='Ankith Mohan',
       #author_email='gward@python.net',
-      url='https://github.com/ankithmo/tsne-pytorch',
+      url='https://github.com/ankithmo/pytorch_tsne',
      )
