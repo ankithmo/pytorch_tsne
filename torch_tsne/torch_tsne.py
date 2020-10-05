@@ -22,7 +22,7 @@ def Hbeta_torch(D, beta=1.0):
     return H, P
 
 
-def x2p_torch(X, tol=1e-5, perplexity=30.0):
+def x2p_torch(X, cuda, tol=1e-5, perplexity=30.0):
     """
         Performs a binary search to get P-values in such a way that each
         conditional Gaussian has the same perplexity.
@@ -38,6 +38,12 @@ def x2p_torch(X, tol=1e-5, perplexity=30.0):
     P = torch.zeros(n, n)
     beta = torch.ones(n, 1)
     logU = torch.log(torch.tensor([perplexity]))
+
+    if cuda:
+        P = P.cuda()
+        beta = beta.cuda()
+        logU = logU.cuda()
+
     n_list = list(range(n))
 
     # Loop over all datapoints
@@ -87,8 +93,8 @@ def x2p_torch(X, tol=1e-5, perplexity=30.0):
 
 def pca_torch(X, no_dims=50):
     print("Preprocessing the data using PCA...")
-    (n, d) = X.shape
-    X = X - torch.mean(X, 0)
+    (n, d) = X.size()
+    X -= torch.mean(X, 0)
 
     (l, M) = torch.eig(X.t() @ X, True)
     # split M real
@@ -101,7 +107,7 @@ def pca_torch(X, no_dims=50):
     return Y
 
 
-def tsne(X, no_dims=2, initial_dims=50, perplexity=30.0):
+def tsne(X, cuda, no_dims=2, initial_dims=50, perplexity=30.0):
     """
         Runs t-SNE on the dataset in the NxD array X to reduce its
         dimensionality to no_dims dimensions. The syntaxis of the function is
@@ -114,7 +120,7 @@ def tsne(X, no_dims=2, initial_dims=50, perplexity=30.0):
 
     # Initialize variables
     X = pca_torch(X, initial_dims)
-    (n, d) = X.shape
+    (n, d) = X.size()
     max_iter = 1000
     initial_momentum = 0.5
     final_momentum = 0.8
@@ -126,8 +132,14 @@ def tsne(X, no_dims=2, initial_dims=50, perplexity=30.0):
     iY = torch.zeros(n, no_dims)
     gains = torch.ones(n, no_dims)
 
+    if cuda:
+        Y = Y.cuda()
+        dY = dY.cuda()
+        iY = iY.cuda()
+        gains = gains.cuda()
+
     # Compute P-values
-    P = x2p_torch(X, 1e-5, perplexity)
+    P = x2p_torch(X, cuda, 1e-5, perplexity)
     P += P.t()
     P /= torch.sum(P)
     P *= 4.    # early exaggeration

@@ -15,7 +15,7 @@ mnist = osp.join(osp.abspath(osp.dirname(__file__)), "..", "mnist")
 parser = argparse.ArgumentParser()
 parser.add_argument("--xfile", type=str, default=osp.join(mnist, "mnist2500_X.txt"), help="file name of feature stored")
 parser.add_argument("--yfile", type=str, default=osp.join(mnist, "mnist2500_labels.txt"), help="file name of label stored")
-parser.add_argument("--cuda", type=int, default=1, help="if use cuda accelarate")
+parser.add_argument("--cuda", type=bool, default=True, help="if use cuda accelarate")
 
 opt = parser.parse_args()
 print("get choice from args", opt)
@@ -31,9 +31,10 @@ else:
 if __name__ == "__main__":
     print("Run Y = tsne.tsne(X, no_dims, perplexity) to perform t-SNE on your dataset.")
 
-    X = np.loadtxt(xfile)
-    X = torch.Tensor(X)
-    labels = np.loadtxt(yfile).tolist()
+    X, labels = np.loadtxt(xfile), np.loadtxt(yfile)
+    X, labels = torch.Tensor(X), torch.Tensor(labels)
+    if opt.cuda:
+        X, labels = X.cuda(), labels.cuda()
 
     # confirm that x file get same number point than label file
     # otherwise may cause error in scatter
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     assert(len(X)==len(labels))
 
     with torch.no_grad():
-        Y = tsne(X, 2, 50, 20.0)
+        Y = tsne(X, opt.cuda, 2, 50, 20.0)
 
     if opt.cuda:
         Y = Y.cpu().numpy()
